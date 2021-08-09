@@ -26,7 +26,7 @@ Meeting the requirements, just run:
 go run ./cmd/service
 ```
 
-Dockefile and docker-compose files are availables for development to mount a container with the running service and a Redis container with its canonical port exposed to the host for debug purposes. In addition every change to the code will be live reloaded. Just run:
+Dockefile and docker-compose files are availables for development to mount containers with the running service, `Postgres` and `Redis` with its canonical port exposed to the host for debug purposes. A `MinIO` container will be mount to act as a S3 storage. In addition every change to the code will be live reloaded. Just run:
 
 ```bash
 docker-compose up -d
