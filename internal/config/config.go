@@ -12,10 +12,6 @@ func init() {
 // Initialize the configuration
 func Initialize() {
 	viper.SetDefault("port", 80)
-	viper.SetDefault("DB_HOST", "localhost")
-	viper.SetDefault("DB_NAME", "classroom")
-	viper.SetDefault("DB_USERNAME", "postgres")
-	viper.SetDefault("DB_PASSWORD", "secret")
 
 	viper.AutomaticEnv()
 

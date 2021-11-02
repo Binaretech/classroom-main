@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	"github.com/Binaretech/classroom-main/internal/config"
+	_ "github.com/Binaretech/classroom-main/internal/config"
 	"log"
 	"os"
 	"time"
@@ -22,7 +22,6 @@ func init() {
 		if err := OpenDatabase(); err != nil {
 			logrus.Errorln("Error connecting to database", err)
 			time.Sleep(5 * time.Second)
-			config.Initialize()
 		} else {
 			Migrate()
 			return
@@ -83,18 +82,18 @@ func Drop() error {
 // connectionString returns the connection string based on the environment
 func connectionString() string {
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=UTC",
-		viper.GetString("DATABASE_HOST"),
-		viper.GetString("DATABASE_USER"),
-		viper.GetString("DATABASE_PASS"),
-		viper.GetString("DATABASE_NAME"),
-		viper.GetString("DATABASE_PORT"),
+		viper.GetString("DB_HOST"),
+		viper.GetString("DB_USER"),
+		viper.GetString("DB_PASS"),
+		viper.GetString("DB_NAME"),
+		viper.GetString("DB_PORT"),
 	)
 }
 
 // CreateDatabase create a new database based on DATABASE_NAME config
 func CreateDatabase() error {
-	originalName := viper.GetString("DATABASE_NAME")
-	viper.Set("DATABASE_NAME", "postgres")
+	originalName := viper.GetString("DB_NAME")
+	viper.Set("DB_NAME", "postgres")
 
 	conn, err := gorm.Open(postgres.Open(connectionString()), &gorm.Config{})
 	if err != nil {
@@ -105,7 +104,7 @@ func CreateDatabase() error {
 		return err
 	}
 
-	viper.Set("DATABASE_NAME", originalName)
+	viper.Set("DB_NAME", originalName)
 
 	return nil
 }
