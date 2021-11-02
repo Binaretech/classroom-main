@@ -18,15 +18,17 @@ import (
 )
 
 func init() {
-	for {
+	for i := 0; i < 5; i++ {
 		if err := OpenDatabase(); err != nil {
 			logrus.Errorln("Error connecting to database", err)
 			time.Sleep(5 * time.Second)
 		} else {
 			Migrate()
-			break
+			return
 		}
 	}
+
+	logrus.Fatal("Could not connect to database")
 }
 
 const (
