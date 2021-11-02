@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
+	_ "github.com/Binaretech/classroom-main/internal/config"
+
 	"github.com/Binaretech/classroom-main/internal/server"
 	"github.com/gofiber/fiber/v2"
 )
