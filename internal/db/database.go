@@ -2,7 +2,7 @@ package db
 
 import (
 	"fmt"
-	_ "github.com/Binaretech/classroom-main/internal/config"
+	"github.com/Binaretech/classroom-main/internal/config"
 	"log"
 	"os"
 	"time"
@@ -22,6 +22,7 @@ func init() {
 		if err := OpenDatabase(); err != nil {
 			logrus.Errorln("Error connecting to database", err)
 			time.Sleep(5 * time.Second)
+			config.Initialize()
 		} else {
 			Migrate()
 			return
