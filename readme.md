@@ -15,13 +15,14 @@ Full source is available on https://github.com/Binaretech/classroom
 
 ## Description
 
-This service is designed to handle with users and classes process 
+This service is designed to handle with users and classes process
 
 ## Running
 
 This service depends on the `Main service` only for the login interface, also this project uses `Redis` for JWT verification
 
 Meeting the requirements, just run:
+
 ```bash
 go run ./cmd/service
 ```
@@ -31,3 +32,4 @@ Dockefile and docker-compose files are availables for development to mount conta
 ```bash
 docker-compose up -d
 ```
+
