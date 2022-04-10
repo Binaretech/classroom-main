@@ -1,0 +1,10 @@
+info:
+  contact:
+    name: Binaretech
+  description: Main API for the classroom
+  license:
+    name: Apache 2.0
+  title: Classroom API
+  version: "0.1"
+paths: {}
+swagger: "2.0"

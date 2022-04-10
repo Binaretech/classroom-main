@@ -1,0 +1,15 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Main API for the classroom",
+        "title": "Classroom API",
+        "contact": {
+            "name": "Binaretech"
+        },
+        "license": {
+            "name": "Apache 2.0"
+        },
+        "version": "0.1"
+    },
+    "paths": {}
+}
