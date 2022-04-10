@@ -49,7 +49,8 @@ func StoreUser(c *fiber.Ctx) error {
 			return err
 		}
 
-		file, _ := c.FormFile("image")
+		file,_ := c.FormFile("image")
+
 		if err := user.UpdateProfileImage(tx, file, user.ID); err != nil {
 			return err
 		}

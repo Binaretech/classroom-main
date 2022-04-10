@@ -17,6 +17,6 @@ func App() *fiber.App {
 	api.Post("/user", handler.StoreUser)
 	api.Put("/user", handler.UpdateUser)
 
-	// api.Get("/sections", handler.UserSections)
+	api.Get("/sections", handler.UserSections)
 	return app
 }
