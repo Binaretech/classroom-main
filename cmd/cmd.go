@@ -8,7 +8,6 @@ import (
 	"github.com/Binaretech/classroom-main/storage"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
@@ -17,7 +16,7 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		storage.OpenStorage()
 
-		logrus.Fatalln(server.App().Listen(fmt.Sprintf(":%s", viper.GetString("port"))))
+		logrus.Fatalln(server.Listen())
 	},
 }
 

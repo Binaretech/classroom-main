@@ -1,22 +1,28 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/Binaretech/classroom-main/errors"
 	"github.com/Binaretech/classroom-main/handler"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
+	"github.com/spf13/viper"
 )
 
-func App() *fiber.App {
-	app := fiber.New(fiber.Config{
-		ErrorHandler: errors.Handler,
-	})
+func Listen() error {
+	app := echo.New()
+
+	app.HTTPErrorHandler = func(err error, ctx echo.Context) {
+		errors.Handler(err, ctx)
+	}
 
 	api := app.Group("/api")
 
-	api.Get("/user", handler.User)
-	api.Post("/user", handler.StoreUser)
-	api.Put("/user", handler.UpdateUser)
+	api.GET("/user", handler.User)
+	api.POST("/user", handler.StoreUser)
+	api.PUT("/user", handler.UpdateUser)
 
-	api.Get("/sections", handler.UserSections)
-	return app
+	api.GET("/sections", handler.UserSections)
+
+	return app.Start(fmt.Sprintf(":%s", viper.GetString("port")))
 }

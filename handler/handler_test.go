@@ -3,25 +3,25 @@ package handler_test
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"net/http/httptest"
 
 	"github.com/Binaretech/classroom-main/db"
 	"github.com/Binaretech/classroom-main/db/model"
-	"github.com/Binaretech/classroom-main/server"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
-func request(method, path string, body io.Reader, headers map[string]string) (*http.Response, error) {
+func request(method, path string, body io.Reader, headers map[string]string) (*httptest.ResponseRecorder, echo.Context) {
 	req := httptest.NewRequest(method, fmt.Sprintf("/api%s", path), body)
-	req.Header.Set(fiber.HeaderContentType, fiber.MIMEApplicationJSON)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
 	for header, value := range headers {
 		req.Header.Set(header, value)
 	}
 
-	return server.App().Test(req)
+	rec := httptest.NewRecorder()
+
+	return rec, echo.New().NewContext(req, rec)
 }
 
 func createTestUser() *model.User {

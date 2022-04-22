@@ -3,11 +3,11 @@ package handler
 import (
 	"github.com/Binaretech/classroom-main/db"
 	"github.com/Binaretech/classroom-main/db/model"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 )
 
-func UserSections(c *fiber.Ctx) error {
-	userID := c.Get("X-User")
+func UserSections(c echo.Context) error {
+	userID := c.Request().Header.Get("X-User")
 
 	req := newPaginatedRequest(c)
 

@@ -3,33 +3,37 @@ package errors
 import (
 	"encoding/json"
 	"errors"
+	"net/http"
 
 	"github.com/Binaretech/classroom-main/lang"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 	"gorm.io/gorm"
 )
 
 // Handler catch all the errors and returns a propper response based on the error type
-func Handler(c *fiber.Ctx, err error) error {
-
+func Handler(err error, c echo.Context) {
 	if e, ok := err.(*json.UnmarshalTypeError); ok {
-		return response(c, NewBadRequestWrapped(lang.Trans("invalid data type"), e))
+		response(c, NewBadRequestWrapped(lang.Trans("invalid data type"), e))
+		return
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return response(c, WrapError(err, lang.Trans("not found"), fiber.StatusNotFound))
+		response(c, WrapError(err, lang.Trans("not found"), http.StatusNotFound))
+		return
 	}
 
 	if e, ok := err.(ServerError); ok {
-		return response(c, e)
+		response(c, e)
+		return
 	}
 
-	return response(c, WrapError(err, lang.Trans("internal error"), fiber.StatusInternalServerError))
+	response(c, WrapError(err, lang.Trans("internal error"), http.StatusInternalServerError))
+	return
 }
 
-func response(c *fiber.Ctx, err ServerError) error {
-	message := fiber.Map{
+func response(c echo.Context, err ServerError) error {
+	message := echo.Map{
 		"error": err.GetMessage(),
 	}
 
@@ -37,5 +41,5 @@ func response(c *fiber.Ctx, err ServerError) error {
 		message["debug"] = err.Error()
 	}
 
-	return c.Status(int(err.GetCode())).JSON(message)
+	return c.JSON(int(err.GetCode()), message)
 }

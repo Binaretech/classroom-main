@@ -1,8 +1,10 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/Binaretech/classroom-main/db"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 
@@ -20,9 +22,9 @@ type paginatedRequest struct {
 	Limit int `json:"limit"`
 }
 
-func newPaginatedRequest(c *fiber.Ctx) paginatedRequest {
+func newPaginatedRequest(c echo.Context) paginatedRequest {
 	req := paginatedRequest{}
-	c.QueryParser(&req)
+	c.Bind(&req)
 
 	if req.Page < 1 {
 		req.Page = 1
@@ -53,7 +55,7 @@ func (req *paginatedRequest) PaginatedResource(model interface{}, query *gorm.DB
 	}
 }
 
-func PaginatedResource[T any](c *fiber.Ctx, req paginatedRequest, query *gorm.DB) error {
+func PaginatedResource[T any](c echo.Context, req paginatedRequest, query *gorm.DB) error {
 	var resource []T
-	return c.JSON(req.PaginatedResource(&resource, query))
+	return c.JSON(http.StatusOK, req.PaginatedResource(&resource, query))
 }

@@ -3,12 +3,12 @@ package handler_test
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"net/http"
 	"testing"
 
 	"github.com/Binaretech/classroom-main/db"
 	"github.com/Binaretech/classroom-main/db/model"
-	"github.com/gofiber/fiber/v2"
+	"github.com/Binaretech/classroom-main/handler"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,18 +32,18 @@ func TestUserSections(t *testing.T) {
 
 	db.Create(classes)
 
-	res, err := request("GET", "/sections", nil, map[string]string{
+	rec, c := request("GET", "/sections", nil, map[string]string{
 		"X-User": user.ID,
 	})
 
-	assert.Nil(t, err)
-	assert.Equal(t, fiber.StatusOK, res.StatusCode)
-	raw, _ := ioutil.ReadAll(res.Body)
+	if assert.NoError(t, handler.UserSections(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
 
-	response := make(map[string]interface{})
-	json.Unmarshal(raw, &response)
+		response := make(map[string]interface{})
+		json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NotNil(t, response["data"])
+		assert.Equal(t, 1, int(response["page"].(float64)))
+		assert.Equal(t, 10, int(response["limit"].(float64)))
+	}
 
-	assert.NotNil(t, response["data"])
-	assert.Equal(t, 10, int(response["limit"].(float64)))
-	assert.Equal(t, 1, int(response["page"].(float64)))
 }

@@ -3,12 +3,13 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"net/http"
 	"testing"
 
 	"github.com/Binaretech/classroom-main/db/model"
+	"github.com/Binaretech/classroom-main/handler"
 	"github.com/brianvoe/gofakeit/v6"
-	"github.com/gofiber/fiber/v2"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,36 +17,35 @@ func TestHasProfile(t *testing.T) {
 	t.Run("has profile", func(t *testing.T) {
 		user := createTestUser()
 
-		resp, err := request(fiber.MethodGet, "/user", nil, map[string]string{
-			fiber.HeaderContentType: "application/json",
-			"X-USER":                user.ID,
+		rec, c := request(http.MethodGet, "/api/user", nil, map[string]string{
+			echo.HeaderContentType: echo.MIMEApplicationJSON,
+			"X-USER":               user.ID,
 		})
 
-		assert.Nil(t, err)
-		raw, _ := ioutil.ReadAll(resp.Body)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode, string(raw))
+		if assert.NoError(t, handler.User(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
 
-		response := struct {
-			User *model.User `json:"user"`
-		}{}
+			response := struct {
+				User *model.User `json:"user"`
+			}{}
 
-		json.Unmarshal(raw, &response)
+			json.Unmarshal(rec.Body.Bytes(), &response)
 
-		assert.Equal(t, user.ID, response.User.ID)
-		assert.Equal(t, user.Name, response.User.Name)
-		assert.Equal(t, user.Lastname, response.User.Lastname)
-
+			assert.Equal(t, user.ID, response.User.ID)
+			assert.Equal(t, user.Name, response.User.Name)
+			assert.Equal(t, user.Lastname, response.User.Lastname)
+		}
 	})
+
 	t.Run("no profile", func(t *testing.T) {
-		resp, err := request(fiber.MethodGet, "/user", nil, map[string]string{
-			fiber.HeaderContentType: "application/json",
-			"X-USER":                gofakeit.UUID(),
+		rec, c := request(http.MethodGet, "/api/user", nil, map[string]string{
+			echo.HeaderContentType: echo.MIMEApplicationJSON,
+			"X-USER":               gofakeit.UUID(),
 		})
 
-		assert.Nil(t, err)
-		raw, _ := ioutil.ReadAll(resp.Body)
-		assert.Equal(t, fiber.StatusNotFound, resp.StatusCode, string(raw))
-
+		if assert.NoError(t, handler.User(c)) {
+			assert.Equal(t, http.StatusNotFound, rec.Code, rec.Body.String())
+		}
 	})
 }
 
@@ -61,24 +61,14 @@ func TestStoreUser(t *testing.T) {
 
 		body, _ := json.Marshal(user)
 
-		resp, err := request(fiber.MethodPost, "/user", bytes.NewBuffer(body), map[string]string{
-			fiber.HeaderContentType: "application/json",
-			"X-User":                ID,
+		rec, c := request(http.MethodPost, "/api/user", bytes.NewBuffer(body), map[string]string{
+			echo.HeaderContentType: echo.MIMEApplicationJSON,
+			"X-User":               ID,
 		})
 
-		assert.Nil(t, err)
-		raw, _ := ioutil.ReadAll(resp.Body)
-		assert.Equal(t, resp.StatusCode, fiber.StatusCreated, string(raw))
-
-		response := struct {
-			User *model.User `json:"user"`
-		}{}
-
-		json.Unmarshal(raw, &response)
-
-		assert.Equal(t, ID, response.User.ID)
-		assert.Equal(t, user.Name, response.User.Name)
-		assert.Equal(t, user.Lastname, response.User.Lastname)
+		if assert.NoError(t, handler.StoreUser(c)) {
+			assert.Equal(t, http.StatusCreated, rec.Code)
+		}
 
 	})
 
@@ -88,14 +78,14 @@ func TestStoreUser(t *testing.T) {
 
 		body, _ := json.Marshal(user)
 
-		resp, err := request(fiber.MethodPost, "/user", bytes.NewBuffer(body), map[string]string{
-			fiber.HeaderContentType: "application/json",
-			"X-User":                user.ID,
+		rec, c := request(http.MethodPost, "/api/user", bytes.NewBuffer(body), map[string]string{
+			echo.HeaderContentType: echo.MIMEApplicationJSON,
+			"X-User":               user.ID,
 		})
 
-		assert.Nil(t, err)
-		raw, _ := ioutil.ReadAll(resp.Body)
-		assert.Equal(t, fiber.StatusUnprocessableEntity, resp.StatusCode, string(raw))
+		if assert.NoError(t, handler.StoreUser(c)) {
+			assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+		}
 
 	})
 }
@@ -109,15 +99,14 @@ func TestUpdateUser(t *testing.T) {
 
 		body, _ := json.Marshal(user)
 
-		resp, err := request(fiber.MethodPut, "/user", bytes.NewBuffer(body), map[string]string{
-			fiber.HeaderContentType: "application/json",
-			"X-User":                user.ID,
+		rec, c := request(http.MethodPut, "/user", bytes.NewBuffer(body), map[string]string{
+			echo.HeaderContentType: echo.MIMEApplicationJSON,
+			"X-User":               user.ID,
 		})
 
-		assert.Nil(t, err)
-		raw, _ := ioutil.ReadAll(resp.Body)
-		assert.Equal(t, fiber.StatusOK, resp.StatusCode, string(raw))
-
+		if assert.NoError(t, handler.UpdateUser(c)) {
+			assert.Equal(t, http.StatusOK, rec.Code)
+		}
 	})
 
 	t.Run("update user with invalid id", func(t *testing.T) {
@@ -127,14 +116,13 @@ func TestUpdateUser(t *testing.T) {
 
 		body, _ := json.Marshal(user)
 
-		resp, err := request(fiber.MethodPut, "/user", bytes.NewBuffer(body), map[string]string{
-			fiber.HeaderContentType: "application/json",
-			"X-User":                gofakeit.UUID(),
+		rec, c := request(http.MethodPut, "/user", bytes.NewBuffer(body), map[string]string{
+			echo.HeaderContentType: echo.MIMEApplicationJSON,
+			"X-User":               gofakeit.UUID(),
 		})
 
-		assert.Nil(t, err)
-		raw, _ := ioutil.ReadAll(resp.Body)
-		assert.Equal(t, fiber.StatusUnprocessableEntity, resp.StatusCode, string(raw))
-
+		if assert.NoError(t, handler.UpdateUser(c)) {
+			assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+		}
 	})
 }

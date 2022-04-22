@@ -1,15 +1,19 @@
 package response
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"net/http"
 
-func ResponseBadRequest(c *fiber.Ctx, msg string) error {
-	return c.Status(fiber.StatusBadRequest).JSON(map[string]string{
+	"github.com/labstack/echo/v4"
+)
+
+func ResponseBadRequest(c echo.Context, msg string) error {
+	return c.JSON(http.StatusBadRequest, map[string]string{
 		"message": msg,
 	})
 }
 
-func ResponseMessage(c *fiber.Ctx, status int, content interface{}) error {
-	return c.Status(status).JSON(map[string]interface{}{
+func ResponseMessage(c echo.Context, status int, content interface{}) error {
+	return c.JSON(status, map[string]interface{}{
 		"message": content,
 	})
 }

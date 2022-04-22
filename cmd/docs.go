@@ -8,10 +8,9 @@ import (
 	"os/exec"
 	"path"
 
-	swagger "github.com/arsmn/fiber-swagger/v2"
-	"github.com/gofiber/fiber/v2"
-
+	"github.com/labstack/echo/v4"
 	"github.com/spf13/cobra"
+	"github.com/swaggo/echo-swagger"
 
 	_ "github.com/Binaretech/classroom-main/docs"
 )
@@ -20,11 +19,11 @@ var docsServeCmd = &cobra.Command{
 	Use:   "docs:serve",
 	Short: "Serve the documentation",
 	Run: func(cmd *cobra.Command, args []string) {
-		app := fiber.New()
+		app := echo.New()
 
-		app.Get("/*", swagger.HandlerDefault)
+		app.GET("/swagger/*", echoSwagger.WrapHandler)
 
-		log.Fatal(app.Listen(":8080"))
+		log.Fatal(app.Start(":8080"))
 
 	},
 }
