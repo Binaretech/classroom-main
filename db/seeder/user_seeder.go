@@ -7,15 +7,15 @@ import (
 )
 
 func userSeeder() {
-	users := make([]model.User, 11)
+	users := make([]model.User, 10)
 
-	users = append(users, model.User{
+	users[0] = model.User{
 		ID:       "61a406ea18f8a0bdf663e144",
 		Name:     gofakeit.Name(),
 		Lastname: gofakeit.LastName(),
-	})
+	}
 
-	for i := 0; i < 10; i++ {
+	for i := 1; i < 10; i++ {
 		users[i] = model.User{
 			ID:       gofakeit.UUID(),
 			Name:     gofakeit.Name(),

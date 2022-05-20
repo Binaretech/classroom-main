@@ -12,9 +12,9 @@ import (
 
 // User model for the database table users
 type User struct {
-	ID           string `gorm:"primaryKey;type=varchar(32)"`
-	Name         string `gorm:"type:varchar(64)" json:"name"`
-	Lastname     string `gorm:"type:varchar(64)" json:"lastname"`
+	ID           string `gorm:"primaryKey;type=varchar(32);not null"`
+	Name         string `gorm:"type:varchar(64);not null" json:"name"`
+	Lastname     string `gorm:"type:varchar(64);not null" json:"lastname"`
 	ProfileImage *File  `gorm:"-" json:"profileImage,omitempty"`
 	Files        []File `gorm:"polymorphic:Fileable;" json:"files,omitempty"`
 	Timestamps
