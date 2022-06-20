@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Binaretech/classroom-main/db"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
+	"gorm.io/gorm"
 )
 
-type seeder func()
+type seeder func(db *gorm.DB)
 
 type Seed struct {
 	Name   string
@@ -35,10 +37,12 @@ func Run() {
 func call(seeds []Seed) {
 	gofakeit.Seed(42)
 
+	db, _ := db.Connect()
+
 	if name := viper.GetString("name"); name != "" {
 		for _, seed := range seeds {
 			if seed.Name == name {
-				seed.Seeder()
+				seed.Seeder(db)
 			}
 		}
 		return
@@ -51,8 +55,9 @@ func call(seeds []Seed) {
 
 func seed(seed Seed) {
 	start := time.Now()
+	db, _ := db.Connect()
 
 	color.Green("Seeding %s...", seed.Name)
-	seed.Seeder()
+	seed.Seeder(db)
 	color.Blue("Seeded %s. (%.2f)s", seed.Name, time.Since(start).Seconds())
 }

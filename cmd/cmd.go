@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Binaretech/classroom-main/db"
 	"github.com/Binaretech/classroom-main/server"
 	"github.com/Binaretech/classroom-main/storage"
 	"github.com/sirupsen/logrus"
@@ -16,7 +17,11 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		storage.OpenStorage()
 
-		logrus.Fatalln(server.Listen())
+		if db, err := db.Connect(); err != nil {
+			logrus.Fatal(err)
+		} else {
+			logrus.Fatalln(server.Listen(db))
+		}
 	},
 }
 

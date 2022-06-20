@@ -6,12 +6,12 @@ import (
 
 // BigID is a type that can hold a big integer.
 type BigID struct {
-	ID uint `gorm:"primarykey"`
+	ID uint `gorm:"primarykey" json:"id"`
 }
 
 // IntID is a type that can hold an integer.
 type IntID struct {
-	ID int `gorm:"primarykey,type=serial"`
+	ID int `gorm:"primarykey,type=serial" json:"id"`
 }
 
 // Timestamps is a type that can hold createdAt and updatedAt timestamps.

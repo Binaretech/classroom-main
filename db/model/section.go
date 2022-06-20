@@ -4,7 +4,7 @@ package model
 type Section struct {
 	BigID
 	Name      string     `gorm:"size:32;not null" json:"name"`
-	ClassID   uint       `gorm:"foreignKey;not null" json:"classID"`
+	ClassID   uint       `gorm:"foreignKey;not null" json:"classId"`
 	Class     *Class     `json:"class,omitempty"`
 	Students  []User     `gorm:"many2many:students" json:"students,omitempty"`
 	Teachers  []User     `gorm:"many2many:teachers" json:"teachers,omitempty"`

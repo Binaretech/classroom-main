@@ -15,7 +15,7 @@ type Assignment struct {
 	Grade            sql.NullFloat64 `gorm:"type:decimal(5,2)" json:"grade"`
 	BaseGrade        float32         `gorm:"type:decimal(5,2)" json:"baseGrade"`
 	ParticipantCount uint16          `gorm:"not null;default:1" json:"participantCount"`
-	ClassID          uint            `gorm:"foreignKey;not null" json:"classID"`
+	ClassID          uint            `gorm:"foreignKey;not null" json:"classId"`
 	Class            *Class          `json:"class,omitempty"`
 	Timestamps
 }

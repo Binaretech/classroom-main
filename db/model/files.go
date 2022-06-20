@@ -16,6 +16,6 @@ type File struct {
 	Bucket       string `json:"bucket"`
 	MimeType     string `gorm:"size:32;not null" json:"mimeType"`
 	FileableType string `gorm:"size:30;not null" json:"fileableType"`
-	FileableID   string `gorm:"not null" json:"fileableID"`
+	FileableID   string `gorm:"not null" json:"fileableId"`
 	Timestamps
 }

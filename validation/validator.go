@@ -1,11 +1,13 @@
 package validation
 
 import (
-	"fmt"
+	"net/http"
 
 	"github.com/Binaretech/classroom-main/lang"
 	"github.com/Binaretech/classroom-main/utils"
 	"github.com/Binaretech/classroom-main/validation/rule"
+	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 
 	"github.com/go-playground/validator/v10"
 	en_translations "github.com/go-playground/validator/v10/translations/en"
@@ -19,27 +21,29 @@ type ErrorResponse struct {
 	ValidationErrors map[string][]string `json:"validationErrors"`
 }
 
-// SetUpValidator configures and returns an instance of `validator.Validate`
-func SetUpValidator() *validator.Validate {
-	validate := validator.New()
-
-	rule.RegisterExistsRule(validate)
-	rule.RegisterUniqueRule(validate)
-
-	es_translations.RegisterDefaultTranslations(validate, lang.Translator("es"))
-	en_translations.RegisterDefaultTranslations(validate, lang.Translator("en"))
-
-	return validate
+type Validator struct {
+	validate *validator.Validate
 }
 
-// Struct validate struct and return an ErrorResponse if there are a validation error
-func Struct(request interface{}) *ErrorResponse {
-	errors := map[string][]string{}
-	validate := SetUpValidator()
+func newValidator(validate *validator.Validate) *Validator {
+	return &Validator{validate: validate}
+}
 
-	if err := validate.Struct(request); err != nil {
+func (v *Validator) Validate(data any) error {
+	errors := map[string][]string{}
+
+	if err := v.validate.Struct(data); err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
-			name := utils.LowerCaseInitial(err.Field())
+
+			var name string
+
+			switch field := err.Field(); field {
+			case "ID":
+				name = "id"
+			default:
+				name = utils.LowerCaseInitial(field)
+			}
+
 			if _, ok := errors[name]; !ok {
 				errors[name] = []string{}
 			}
@@ -52,31 +56,18 @@ func Struct(request interface{}) *ErrorResponse {
 		return nil
 	}
 
-	return &ErrorResponse{ValidationErrors: errors}
+	return echo.NewHTTPError(http.StatusUnprocessableEntity, &ErrorResponse{ValidationErrors: errors})
 }
 
-// Map validate map and return an ErrorResponse if there are a validation error
-func Map(request map[string]interface{}, rules map[string]interface{}) *ErrorResponse {
-	errors := map[string][]string{}
-	validate := SetUpValidator()
+// SetUpValidator configures and returns an instance of `validator.Validate`
+func SetUpValidator(db *gorm.DB) *Validator {
+	validate := validator.New()
 
-	if err := validate.ValidateMap(request, rules); err != nil {
-		for name, value := range err {
+	rule.RegisterExistsRule(db, validate)
+	rule.RegisterUniqueRule(db, validate)
 
-			if _, ok := errors[name]; !ok {
-				errors[name] = []string{}
-			}
+	es_translations.RegisterDefaultTranslations(validate, lang.Translator("es"))
+	en_translations.RegisterDefaultTranslations(validate, lang.Translator("en"))
 
-			for _, e := range value.(validator.ValidationErrors) {
-				errors[name] = append(errors[name], fmt.Sprintf("%s%s", lang.Trans(name), e.Translate(lang.Translator(viper.GetString("locale")))))
-			}
-
-		}
-	}
-
-	if len(errors) == 0 {
-		return nil
-	}
-
-	return &ErrorResponse{ValidationErrors: errors}
+	return newValidator(validate)
 }

@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Binaretech/classroom-main/db"
 	"github.com/Binaretech/classroom-main/lang"
+	"gorm.io/gorm"
 
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
 )
 
 // exists checks if the field exists in database:w
-func exists() func(validator.FieldLevel) bool {
+func exists(db *gorm.DB) func(validator.FieldLevel) bool {
 	return func(fl validator.FieldLevel) bool {
 		params := strings.Split(fl.Param(), ";")
 
@@ -42,8 +42,8 @@ func exists() func(validator.FieldLevel) bool {
 	}
 }
 
-func RegisterExistsRule(validate *validator.Validate) {
-	validate.RegisterValidation("exists", exists())
+func RegisterExistsRule(db *gorm.DB, validate *validator.Validate) {
+	validate.RegisterValidation("exists", exists(db))
 
 	validate.RegisterTranslation("exists", lang.Translator("es"), func(ut ut.Translator) error {
 		return ut.Add("exists", "El {0} no existe.", true)

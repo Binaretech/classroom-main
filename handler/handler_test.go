@@ -5,13 +5,14 @@ import (
 	"io"
 	"net/http/httptest"
 
-	"github.com/Binaretech/classroom-main/db"
 	"github.com/Binaretech/classroom-main/db/model"
+	"github.com/Binaretech/classroom-main/validation"
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/labstack/echo/v4"
+	"gorm.io/gorm"
 )
 
-func request(method, path string, body io.Reader, headers map[string]string) (*httptest.ResponseRecorder, echo.Context) {
+func request(method, path string, body io.Reader, headers map[string]string, db *gorm.DB) (*httptest.ResponseRecorder, echo.Context) {
 	req := httptest.NewRequest(method, fmt.Sprintf("/api%s", path), body)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 
@@ -21,10 +22,14 @@ func request(method, path string, body io.Reader, headers map[string]string) (*h
 
 	rec := httptest.NewRecorder()
 
-	return rec, echo.New().NewContext(req, rec)
+	e := echo.New()
+
+	e.Validator = validation.SetUpValidator(db)
+
+	return rec, e.NewContext(req, rec)
 }
 
-func createTestUser() *model.User {
+func createTestUser(db *gorm.DB) *model.User {
 	user := &model.User{
 		ID:       gofakeit.UUID(),
 		Name:     gofakeit.Name(),

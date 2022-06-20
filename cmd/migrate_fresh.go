@@ -13,12 +13,14 @@ var migrateCmd = &cobra.Command{
 	Use:   "migrate:fresh",
 	Short: "Recreate the entire database",
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := db.Drop(); err != nil {
+		conn, _ := db.Connect()
+
+		if err := db.Drop(conn); err != nil {
 			logrus.Error(err.Error())
 			return
 		}
 
-		db.Migrate()
+		db.Migrate(conn)
 
 		if viper.GetBool("seed") {
 			seeder.Run()

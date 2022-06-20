@@ -13,14 +13,17 @@ import (
 )
 
 func TestUserSections(t *testing.T) {
-	user := createTestUser()
+	db, _ := db.Connect()
+	user := createTestUser(db)
 
 	classes := []model.Class{}
+
+	handler := handler.New(db)
 
 	for i := 0; i < 5; i++ {
 		classes = append(classes, model.Class{
 			Name:    "Test Class " + fmt.Sprint(i),
-			AdminID: createTestUser().ID,
+			OwnerID: createTestUser(db).ID,
 			Sections: []model.Section{
 				{
 					Name:     "Test Section",
@@ -34,7 +37,7 @@ func TestUserSections(t *testing.T) {
 
 	rec, c := request("GET", "/sections", nil, map[string]string{
 		"X-User": user.ID,
-	})
+	}, db)
 
 	if assert.NoError(t, handler.UserSections(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)

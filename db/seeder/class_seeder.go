@@ -3,12 +3,12 @@ package seeder
 import (
 	"math/rand"
 
-	"github.com/Binaretech/classroom-main/db"
 	"github.com/Binaretech/classroom-main/db/model"
 	"github.com/brianvoe/gofakeit/v6"
+	"gorm.io/gorm"
 )
 
-func classSeeder() {
+func classSeeder(db *gorm.DB) {
 	classes := []model.Class{}
 
 	for i := 0; i < 50; i++ {
@@ -25,7 +25,7 @@ func classSeeder() {
 
 		classes = append(classes, model.Class{
 			Name:     gofakeit.HipsterSentence(5),
-			AdminID:  usersID[rand.Intn(len(usersID))],
+			OwnerID:  usersID[rand.Intn(len(usersID))],
 			Sections: sections,
 		})
 	}
