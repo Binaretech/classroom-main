@@ -13,13 +13,14 @@ type PaginatedResponse struct {
 	Page  int         `json:"page"`
 	Limit int         `json:"limit"`
 	Total int64       `json:"total"`
+	Pages int         `json:"pages"`
 	Data  interface{} `json:"data"`
 }
 
 // PaginationRequest is a request with pagination information.
 type PaginationRequest struct {
-	Page  int `json:"page"`
-	Limit int `json:"limit"`
+	Page  int `query:"page"`
+	Limit int `query:"limit"`
 }
 
 func NewPaginatedRequest(c echo.Context) PaginationRequest {
@@ -51,6 +52,7 @@ func (req *PaginationRequest) PaginatedResource(resource any, query *gorm.DB) *P
 		Page:  req.Page,
 		Limit: req.Limit,
 		Total: count,
+		Pages: int(int(count) / req.Limit),
 		Data:  resource,
 	}
 }
@@ -60,6 +62,6 @@ func (req *PaginationRequest) SendPaginatedResource(c echo.Context, resource any
 }
 
 func PaginatedResource[T any](c echo.Context, req PaginationRequest, query *gorm.DB) error {
-	var resource []T
+	resource := []T{}
 	return c.JSON(http.StatusOK, req.PaginatedResource(&resource, query))
 }

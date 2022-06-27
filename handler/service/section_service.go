@@ -7,35 +7,45 @@ import (
 )
 
 type sectionUserResource struct {
-	ID           string      `json:"id"`
-	ProfileImage *model.File `json:"profileImage"`
-	Fullname     string      `json:"fullname"`
-	Name         string      `json:"name"`
-	Lastname     string      `json:"lastname"`
-	Type         string      `json:"type"`
+	ID           string       `json:"id"`
+	ProfileImage []model.File `gorm:"polymorphic:Fileable;" json:"profileImage,omitempty"`
+	Name         string       `json:"name"`
+	Lastname     string       `json:"lastname"`
+	Type         string       `json:"type"`
 	model.Timestamps
 	model.SoftDeletable
 }
 
+func (resource *sectionUserResource) AfterFind(tx *gorm.DB) (err error) {
+	return tx.Model(resource).Association("ProfileImage").
+		Find(&resource.ProfileImage,
+			"type = ? AND fileable_type = ? and fileable_id = ?",
+			model.FILE_TYPE_PROFILE_IMAGE,
+			model.FILEABLE_TYPE_USERS,
+			resource.ID,
+		)
+}
+
 func GetSectionMembers(c echo.Context, db *gorm.DB, id string, req PaginationRequest) error {
 
-	baseQuery := db.Model(&model.User{}).
-		Preload("ProfileImage").
-		Where("teachers.section_id = ?", id)
-
-	teachersQuery := baseQuery.
+	teachersQuery := db.Model(&model.User{}).
 		Joins("JOIN teachers ON teachers.user_id = users.id").
-		Select("users.id", "users.name", "users.lastname", "CONCAT(users.name, ' ', users.lastname) as fullname", "'teacher' as type")
+		Where("teachers.section_id = ?", id).
+		Select("users.id", "users.name", "users.lastname", "'teacher' as type")
 
-	studentsQuery := baseQuery.
-		Joins("JOIN teachers ON teachers.user_id = users.id").
-		Select("users.id", "users.name", "users.lastname", "CONCAT(users.name, ' ', users.lastname) as fullname", "'student' as type")
+	studentsQuery := db.Model(&model.User{}).
+		Joins("JOIN students ON students.user_id = users.id").
+		Where("students.section_id = ?", id).
+		Select("users.id", "users.name", "users.lastname", "'student' as type")
 
-	ownerQuery := baseQuery.
-		Joins("JOIN classes ON sections.admin_id = users.id").
-		Select("users.id", "users.name", "users.lastname", "CONCAT(users.name, ' ', users.lastname) as fullname", "'owner' as type")
+	ownerQuery := db.Model(&model.User{}).
+		Joins("JOIN classes ON classes.owner_id = users.id").
+		Joins("JOIN sections ON sections.class_id = classes.id").
+		Where("sections.id = ?", id).
+		Select("users.id", "users.name", "users.lastname", "'owner' as type")
 
-	usersQuery := db.Table("(? UNION ? UNION ?) as users", teachersQuery, studentsQuery, ownerQuery)
+	usersQuery := db.
+		Table("(? UNION ? UNION ?) as users", teachersQuery, studentsQuery, ownerQuery)
 
 	return PaginatedResource[sectionUserResource](c, req, usersQuery)
 }

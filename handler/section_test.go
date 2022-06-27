@@ -16,7 +16,7 @@ func TestUserSections(t *testing.T) {
 	db, _ := db.Connect()
 	user := createTestUser(db)
 
-	classes := []model.Class{}
+	var classes []model.Class
 
 	handler := handler.New(db)
 
@@ -36,6 +36,39 @@ func TestUserSections(t *testing.T) {
 	db.Create(classes)
 
 	rec, c := request("GET", "/sections", nil, map[string]string{
+		"X-User": user.ID,
+	}, db)
+
+	if assert.NoError(t, handler.UserSections(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		response := make(map[string]interface{})
+		json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NotNil(t, response["data"])
+		assert.Equal(t, 1, int(response["page"].(float64)))
+		assert.Equal(t, 10, int(response["limit"].(float64)))
+	}
+
+}
+
+func TestSectionMembers(t *testing.T) {
+	db, _ := db.Connect()
+	user := createTestUser(db)
+
+	handler := handler.New(db)
+
+	section := &model.Section{
+		Name:     "Test Section",
+		Students: []model.User{*user},
+		Class: &model.Class{
+			Name:    "Test Class",
+			OwnerID: createTestUser(db).ID,
+		},
+	}
+
+	db.Create(&section)
+
+	rec, c := request("GET", fmt.Sprintf("/sections/%d/members", section.ID), nil, map[string]string{
 		"X-User": user.ID,
 	}, db)
 

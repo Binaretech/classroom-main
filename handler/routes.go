@@ -8,4 +8,5 @@ func (h *Handler) Routes(api *echo.Group) {
 	api.PUT("/user", h.UpdateUser)
 
 	api.GET("/sections", h.UserSections)
+	api.GET("/sections/:id/members", h.SectionMembers)
 }

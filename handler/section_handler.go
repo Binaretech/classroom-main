@@ -9,7 +9,7 @@ import (
 type userSectionsResponse struct {
 	model.BigID
 	Name      string       `gorm:"size:32;not null" json:"name"`
-	ClassID   uint         `gorm:"foreignKey;not null" json:"classID"`
+	ClassID   uint         `gorm:"foreignKey;not null" json:"classId"`
 	Class     *model.Class `json:"class,omitempty"`
 	IsTeacher bool         `json:"isTeacher"`
 	model.Timestamps
