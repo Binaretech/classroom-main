@@ -58,7 +58,6 @@ func TestSectionMembers(t *testing.T) {
 	handler := handler.New(db)
 
 	section := &model.Section{
-		Name:     "Test Section",
 		Students: []model.User{*user},
 		Class: &model.Class{
 			Name:    "Test Class",
@@ -72,7 +71,7 @@ func TestSectionMembers(t *testing.T) {
 		"X-User": user.ID,
 	}, db)
 
-	if assert.NoError(t, handler.UserSections(c)) {
+	if assert.NoError(t, handler.SectionMembers(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 
 		response := make(map[string]interface{})
